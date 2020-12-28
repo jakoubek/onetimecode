@@ -26,27 +26,34 @@ func main() {
 
 	switch mode {
 	case "numbers":
-		fmt.Printf("length: %s", length)
-		fmt.Printf("min: %s", min)
-		fmt.Printf("max: %s", max)
-		var tmp *onetimecode.NumberedCode
+		var tmp *onetimecode.Onetimecode
 		if length != -1 {
-			tmp = onetimecode.NewNumberedCode(onetimecode.WithLength(length))
+			tmp = onetimecode.NewOnetimecode(onetimecode.WithLength(length))
 		} else {
 			if min != -1 && max != -1 {
-				tmp = onetimecode.NewNumberedCode(onetimecode.WithMinMax(min, max))
+				tmp = onetimecode.NewOnetimecode(onetimecode.WithMinMax(min, max))
 			} else {
-				tmp = onetimecode.NewNumberedCode()
+				tmp = onetimecode.NewOnetimecode()
 			}
 		}
-		code = tmp.String()
+		code = tmp.Code()
 	case "alphanum":
-		code = onetimecode.AlphaNumberCode(length)
+		var tmp *onetimecode.Onetimecode
+		tmp = onetimecode.NewOnetimecode(
+			onetimecode.WithAlphaNumericCode(),
+			onetimecode.WithLength(length),
+			)
+		code = tmp.Code()
 	case "alphanumuc":
-		code = onetimecode.AlphaNumberUcCode(length)
+		var tmp *onetimecode.Onetimecode
+		tmp = onetimecode.NewOnetimecode(
+			onetimecode.WithAlphaNumericUpperCaseCode(),
+			onetimecode.WithLength(length),
+		)
+		code = tmp.Code()
 	case "uuid":
 		code = onetimecode.Uuid()
 	}
 
-	fmt.Println(code)
+	fmt.Println("CODE: ",code)
 }
