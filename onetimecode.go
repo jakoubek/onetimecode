@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"math"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -25,6 +26,8 @@ type Onetimecode struct {
 	length int
 	min int
 	max int
+	ulmcase int
+	withoutDashes bool
 	code int64
 	stringCode string
 }
@@ -52,13 +55,25 @@ func WithAlphaNumericCode() OnetimecodeConfig {
 	}
 }
 
-func WithAlphaNumericUpperCaseCode() OnetimecodeConfig {
+func WithUpperCase() OnetimecodeConfig {
 	return func(code *Onetimecode) {
-		code.codeType = AnAlphaNumericUpperCaseCode
+		code.ulmcase = 1
 	}
 }
 
-func NewOnetimecode(opts ...OnetimecodeConfig) *Onetimecode {
+func WithLowerCase() OnetimecodeConfig {
+	return func(code *Onetimecode) {
+		code.ulmcase = -1
+	}
+}
+
+func WithoutDashes() OnetimecodeConfig {
+	return func(code *Onetimecode) {
+		code.withoutDashes = true
+	}
+}
+
+func NewNumericalCode(opts ...OnetimecodeConfig) *Onetimecode {
 	otc := &Onetimecode{
 		codeType: ANumberedCode,
 		length: 6,
@@ -68,7 +83,34 @@ func NewOnetimecode(opts ...OnetimecodeConfig) *Onetimecode {
 	for _, opt := range opts {
 		opt(otc)
 	}
-	otc.defineValue()
+	otc.defineValueNumeric()
+	return otc
+}
+
+func NewAlphanumericalCode(opts ...OnetimecodeConfig) *Onetimecode {
+	otc := &Onetimecode{
+		codeType: AnAlphaNumericCode,
+		length: 6,
+		ulmcase: 0,
+	}
+	for _, opt := range opts {
+		opt(otc)
+	}
+	otc.defineValueAlphanumeric()
+	return otc
+}
+
+func NewUuidCode(opts ...OnetimecodeConfig) *Onetimecode {
+	otc := &Onetimecode{
+		withoutDashes: false,
+	}
+	for _, opt := range opts {
+		opt(otc)
+	}
+	otc.stringCode = Uuid()
+	if otc.withoutDashes == true {
+		otc.stringCode = strings.Replace(otc.stringCode, "-", "", -1)
+	}
 	return otc
 }
 
@@ -84,37 +126,33 @@ func (otc *Onetimecode) Code() string {
 	return ""
 }
 
-func (otc *Onetimecode) defineValue() {
-	if otc.codeType == ANumberedCode {
-		rand.Seed(time.Now().UnixNano())
-		rndNr := rand.Intn(otc.max-otc.min) + otc.min
-		otc.code = int64(rndNr)
-	} else {
-		if otc.codeType == AnAlphaNumericCode {
-			otc.stringCode = AlphaNumberCode(otc.length)
-		} else if otc.codeType == AnAlphaNumericUpperCaseCode {
-			otc.stringCode = AlphaNumberUcCode(otc.length)
-		}
-	}
+func (otc *Onetimecode) defineValueNumeric() {
+	rand.Seed(time.Now().UnixNano())
+	rndNr := rand.Intn(otc.max-otc.min) + otc.min
+	otc.code = int64(rndNr)
+}
+
+func (otc *Onetimecode) defineValueAlphanumeric() {
+	otc.stringCode = alphaNumberCode(otc.length, otc.ulmcase)
 }
 
 // AlphaNumberCode returns an alphanumeric randomized
 // code of the given length with numbers, uppercase
 // and lowercase characters.
-func AlphaNumberCode(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[source.Int63()%int64(len(charset))]
+func alphaNumberCode(length int, ulmcase int) string {
+	const charsetMixed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const charsetUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const charsetLower = "abcdefghijklmnopqrstuvwxyz0123456789"
+	var charset string
+	switch ulmcase {
+	case -1:
+		charset = charsetLower
+	case 1:
+		charset = charsetUpper
+	default:
+		charset = charsetMixed
 	}
-	return string(b)
-}
 
-// AlphaNumberUcCode returns an alphanumeric randomized
-// code of the given length with numbers and uppercase
-// characters.
-func AlphaNumberUcCode(length int) string {
-	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, length)
 	for i := range b {
 		b[i] = charset[source.Int63()%int64(len(charset))]

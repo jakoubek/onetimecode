@@ -28,26 +28,32 @@ func main() {
 	case "numbers":
 		var tmp *onetimecode.Onetimecode
 		if length != -1 {
-			tmp = onetimecode.NewOnetimecode(onetimecode.WithLength(length))
+			tmp = onetimecode.NewNumericalCode(onetimecode.WithLength(length))
 		} else {
 			if min != -1 && max != -1 {
-				tmp = onetimecode.NewOnetimecode(onetimecode.WithMinMax(min, max))
+				tmp = onetimecode.NewNumericalCode(onetimecode.WithMinMax(min, max))
 			} else {
-				tmp = onetimecode.NewOnetimecode()
+				tmp = onetimecode.NewNumericalCode()
 			}
 		}
 		code = tmp.Code()
 	case "alphanum":
 		var tmp *onetimecode.Onetimecode
-		tmp = onetimecode.NewOnetimecode(
-			onetimecode.WithAlphaNumericCode(),
+		tmp = onetimecode.NewAlphanumericalCode(
 			onetimecode.WithLength(length),
 			)
 		code = tmp.Code()
 	case "alphanumuc":
 		var tmp *onetimecode.Onetimecode
-		tmp = onetimecode.NewOnetimecode(
-			onetimecode.WithAlphaNumericUpperCaseCode(),
+		tmp = onetimecode.NewAlphanumericalCode(
+			onetimecode.WithUpperCase(),
+			onetimecode.WithLength(length),
+		)
+		code = tmp.Code()
+	case "alphanumlc":
+		var tmp *onetimecode.Onetimecode
+		tmp = onetimecode.NewAlphanumericalCode(
+			onetimecode.WithLowerCase(),
 			onetimecode.WithLength(length),
 		)
 		code = tmp.Code()

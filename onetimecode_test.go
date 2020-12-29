@@ -2,6 +2,7 @@ package onetimecode
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -20,7 +21,7 @@ func TestNewOnetimecodeWithLength(t *testing.T) {
 		{9},
 	}
 	for _, c := range cases {
-		nc := NewOnetimecode(
+		nc := NewNumericalCode(
 			WithLength(c.length),
 		)
 		//fmt.Println(nc.length, nc.min, nc.max, nc.code)
@@ -45,7 +46,7 @@ func TestNewOnetimecodeWithMinMax(t *testing.T) {
 		{1000, 1002},
 	}
 	for _, c := range cases {
-		nc := NewOnetimecode(
+		nc := NewNumericalCode(
 			WithMinMax(c.min, c.max),
 		)
 		//fmt.Println(nc.min, nc.max, nc.code)
@@ -56,7 +57,7 @@ func TestNewOnetimecodeWithMinMax(t *testing.T) {
 }
 
 func TestAlphaNumberCode(t *testing.T) {
-	nc := NewOnetimecode(
+	nc := NewAlphanumericalCode(
 		WithAlphaNumericCode(),
 	)
 	if len(nc.stringCode) != nc.length {
@@ -65,27 +66,52 @@ func TestAlphaNumberCode(t *testing.T) {
 }
 
 func TestNumberedCodeInstance(t *testing.T) {
-	nc := NewOnetimecode()
+	nc := NewNumericalCode()
 	if nc.codeType != ANumberedCode {
 		t.Errorf("Code should be of type ANumberedCode")
 	}
 }
 
-func TestAlphaNumberCodeInstance(t *testing.T) {
-	nc := NewOnetimecode(
-		WithAlphaNumericCode(),
+func TestAlphaNumberMixedCaseCodeInstance(t *testing.T) {
+	nc := NewAlphanumericalCode()
+	fmt.Println("MC",nc.stringCode)
+	if nc.codeType != AnAlphaNumericCode {
+		t.Errorf("Code should be of type AnAlphaNumericCode")
+	}
+}
+
+func TestAlphaNumberLowerCaseCodeInstance(t *testing.T) {
+	nc := NewAlphanumericalCode(
+		WithLowerCase(),
 		)
+	fmt.Println("LC",nc.stringCode)
 	if nc.codeType != AnAlphaNumericCode {
 		t.Errorf("Code should be of type AnAlphaNumericCode")
 	}
 }
 
 func TestAlphaNumberUpperCaseCodeInstance(t *testing.T) {
-	nc := NewOnetimecode(
-		WithAlphaNumericUpperCaseCode(),
+	nc := NewAlphanumericalCode(
+		WithUpperCase(),
 	)
-	if nc.codeType != AnAlphaNumericUpperCaseCode {
-		t.Errorf("Code should be of type AnAlphaNumericUpperCaseCode")
+	fmt.Println(nc.stringCode)
+}
+
+func TestUuid(t *testing.T) {
+	nc := NewUuidCode()
+	if len(nc.stringCode) != 36 {
+		t.Errorf("UUID %s should have 36 chars but has %d", nc.stringCode, len(nc.stringCode))
+	}
+	if strings.Count(nc.stringCode, "-") != 4 {
+		t.Errorf("UUID %s should have 4 dashes", nc.stringCode)
 	}
 }
 
+func TestUuidWithoutDashes(t *testing.T) {
+	nc := NewUuidCode(
+		WithoutDashes(),
+		)
+	if len(nc.stringCode) != 32 {
+		t.Errorf("UUID %s (without dashes) should have 32 chars but has %d", nc.stringCode, len(nc.stringCode))
+	}
+}
