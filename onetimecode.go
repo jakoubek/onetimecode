@@ -42,6 +42,18 @@ func WithLength(length int) OnetimecodeConfig {
 	}
 }
 
+func WithMin(min int) OnetimecodeConfig {
+	return func(code *Onetimecode) {
+		code.min = min
+	}
+}
+
+func WithMax(max int) OnetimecodeConfig {
+	return func(code *Onetimecode) {
+		code.max = max
+	}
+}
+
 func WithMinMax(min, max int) OnetimecodeConfig {
 	return func(code *Onetimecode) {
 		code.min = min
