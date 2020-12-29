@@ -1,7 +1,6 @@
 package onetimecode
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"math"
 	"math/rand"
@@ -127,15 +126,10 @@ func NewUuidCode(opts ...OnetimecodeConfig) *Onetimecode {
 }
 
 func (otc *Onetimecode) Code() string {
-	switch otc.codeType {
-	case ANumberedCode:
-		return fmt.Sprint(otc.code)
-	case AnAlphaNumericCode:
-		return otc.stringCode
-	case AnAlphaNumericUpperCaseCode:
-		return otc.stringCode
+	if otc.stringCode == "" {
+		otc.stringCode = string(otc.code)
 	}
-	return ""
+	return otc.stringCode
 }
 
 func (otc *Onetimecode) defineValueNumeric() {
