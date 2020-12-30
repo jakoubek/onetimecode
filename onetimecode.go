@@ -138,7 +138,7 @@ func (otc *Onetimecode) NumberCode() int64 {
 
 func (otc *Onetimecode) defineValueNumeric() {
 	rand.Seed(time.Now().UnixNano())
-	rndNr := rand.Intn(otc.max-otc.min) + otc.min
+	rndNr := rand.Intn(otc.max-otc.min+1) + otc.min
 	otc.code = int64(rndNr)
 }
 
